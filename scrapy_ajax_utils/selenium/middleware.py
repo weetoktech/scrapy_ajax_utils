@@ -1,5 +1,6 @@
 import logging
 import threading
+import time
 
 from scrapy import signals
 from scrapy.http import Request, Response
@@ -48,12 +49,25 @@ class SeleniumDownloaderMiddleware(object):
     def download_by_driver(self, request, spider):
         driver = self.get_driver()
 
+        # 手动定义浏览器尺寸，触发linkedin自动加载section
+        driver.set_window_size(1920, 10800)
+
         try:
             driver.get(request.url)
         except TimeoutException:
             spider.logger.info(f'page download timeout (with selenium): {request.url}')
 
-        # XXX: Check cookies.
+        # 手动加载cookies
+        if request.cookies:
+            if isinstance(request.cookies, list):
+                for cookie in request.cookies:
+                    driver.add_cookie(cookie)
+            else:
+                for k, v in request.cookies.items():
+                    driver.add_cookie({'name': k, 'value': v})
+            # 需要sleep才能二次加载页面
+            time.sleep(1)
+            driver.get(request.url)
 
         if request.wait_until:
             try:
