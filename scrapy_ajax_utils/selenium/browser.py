@@ -64,8 +64,10 @@ def make_options(driver_name, headless=True, disable_image=True, user_agent=None
     if driver_name == 'chrome':
         options = webdriver.ChromeOptions()
         options.headless = headless
+        options.set_preference('devtools.jsonview.enabled', False)
+        options.set_preference('useAutomationExtension', False)
         options.add_argument('--disable-gpu')
-        options.add_argument("--disable-blink-features=AutomationControlled")
+        options.add_argument('--disable-blink-features=AutomationControlled')
         if user_agent:
             options.add_argument(f"--user-agent={user_agent}")
         if disable_image:
